@@ -1,0 +1,29 @@
+FROM localhost/mpd-build
+USER root
+
+# Should (re)load /root/.bashrc so commands installed with pipx can be found on $PATH
+# Use option --format docker to build using podman build
+SHELL ["/bin/bash", "-l", "-c"]
+
+RUN mkdir /scripts
+ADD build.sh /scripts
+ADD mpd.conf /etc
+
+# For fun
+RUN apt-get install -y --no-install-recommends figlet
+# Install clients for working with mpd within container
+RUN apt-get install -y --no-install-recommends mpc ncmpcpp
+
+WORKDIR /src
+
+# Git clone.
+RUN git clone https://github.com/MusicPlayerDaemon/MPD.git
+
+# Prepeare and run build script.
+RUN chmod +x /scripts/build.sh
+RUN /scripts/build.sh
+
+WORKDIR /scripts
+
+# Start MPD and keep running.
+ENTRYPOINT ["sh", "-c", "trap : TERM INT; mpd; tail -f /dev/null & wait"]

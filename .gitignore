@@ -1,0 +1,3 @@
+# The music directory. Never commit files in there but should exist as directory.
+music-db/*
+!music-db/.gitkeep
